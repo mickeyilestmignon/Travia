@@ -1,0 +1,22 @@
+/* clean looking tables with borders and alternating colors */
+table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 0 auto;
+    border-style: solid;
+    border-color: black;
+}
+
+th {
+    background-color: #f2f2f2;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    text-align: left;
+    padding: 8px;
+}
+
+tr:nth-child(even) {
+    background-color: #d9d9d9;
+}

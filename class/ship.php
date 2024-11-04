@@ -1,16 +1,13 @@
 <?php
-// Table ships
-// Fonctions imports des vaiseaux depuis le json
-// Classe object ships, methode import vaisseau -> base de donnée
 
-include 'include/connect.inc.php';
+include_once $_SERVER['DOCUMENT_ROOT'] . '/TraviaProject/include/connect.inc.php';
 
 class ship {
-    private $id;
-    private $name;
-    private $camp;
-    private $speed_kmh;
-    private $capacity;
+    private int $id;
+    private string $name;
+    private string $camp;
+    private float $speed_kmh;
+    private int $capacity;
 
     function __construct($id, $name, $camp, $speed_kmh, $capacity) {
         $this->id = $id;
@@ -20,14 +17,20 @@ class ship {
         $this->capacity = $capacity;
     }
 
-    public function getName() { return $this->name; }
-    public function getCamp() { return $this->camp; }
-    public function getSpeedKmh() { return $this->speed_kmh; }
-    public function getCapacity() { return $this->capacity;}
-    public function getId() { return $this->id; }
+    public function getId(): int
+    { return $this->id; }
+    public function getName(): string
+    { return $this->name; }
+    public function getCamp(): string
+    { return $this->camp; }
+    public function getSpeedKmh(): float
+    { return $this->speed_kmh; }
+    public function getCapacity(): int
+    { return $this->capacity;}
 }
 
-function get_json_ships($json) {
+function get_json_ships($json): array
+{
     $json = file_get_contents($json);
     $data = json_decode($json, true);
     $ships = array();
@@ -41,9 +44,13 @@ function print_ships_in_database($cnx) {
     $stmt = $cnx->prepare("SELECT * FROM ships");
     $stmt->execute();
     $ships = $stmt->fetchAll();
+
+    echo '<table>';
+    echo '<tr><th>name</th><th>camp</th><th>speed_kmh</th><th>capacity</th></tr>';
     foreach ($ships as $ship) {
-        echo 'name = ' . $ship['name'] . ', camp = ' . $ship['camp'] . ', speed_kmh =  ' . $ship['speed_kmh'] . ', capacity =  ' . $ship['capacity'] . '<br>';
+        echo '<tr><td>' . $ship['name'] . '</td><td>' . $ship['camp'] . '</td><td>' . $ship['speed_kmh'] . '</td><td>' . $ship['capacity'] . '</td></tr>';
     }
+    echo '</table>';
 }
 
 ?>
