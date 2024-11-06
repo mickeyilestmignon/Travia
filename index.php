@@ -3,6 +3,7 @@ global $cnx;
 include 'include/connect.inc.php';
 include 'class/ship.php';
 include 'class/planet.php';
+include 'class/trip.php';
 ?>
 
 <!DOCTYPE html>
@@ -30,7 +31,51 @@ include 'class/planet.php';
 
 <h1 id="recherche">Recherche</h1>
 
-<label for="search"></label><input type="text" id="search">
+<form action="search_results.php" method="get">
+    <label for="search">Planète de départ</label>
+    <input type="text" id="depart" name="depart">
+
+    <label for="search">Planète de d'arrivée</label>
+    <input type="text" id="arrivee" name="arrivee">
+
+    <input type="submit" value="Rechercher">
+</form>
+
+<script>
+    $(function() {
+        $("#depart").autocomplete({
+            source: function(request, response) {
+                $.ajax({
+                    url: "script/autocomplete_search.php",
+                    dataType: "json",
+                    data: {
+                        term: request.term
+                    },
+                    success: function(data) {
+                        response(data);
+                    }
+                });
+            },
+            minLength: 2
+        });
+
+        $("#arrivee").autocomplete({
+            source: function(request, response) {
+                $.ajax({
+                    url: "script/autocomplete_search.php",
+                    dataType: "json",
+                    data: {
+                        term: request.term
+                    },
+                    success: function(data) {
+                        response(data);
+                    }
+                });
+            },
+            minLength: 2
+        });
+    });
+</script>
 
 <h1 id="vaisseaux">Les vaiseaux</h1>
 
@@ -51,7 +96,7 @@ if (isset($_GET['return_ships'])) {
     }
 }
 
-print_ships_in_database($cnx);
+//print_ships_in_database($cnx);
 ?>
 
 <h1 id="planetes">Les planètes</h1>
@@ -73,44 +118,15 @@ if (isset($_GET['return_planets'])) {
     }
 }
 
-print_planets_in_database($cnx);
+//print_planets_in_database($cnx);
 ?>
 
 <h1 id="voyages">Les voyages</h1>
 
 <?php
-$stmt = $cnx->query("SELECT * FROM trips");
-$trips = $stmt->fetchAll();
+//print_trips_in_database();
 ?>
-<table>
-    <tr><th>planete_depart</th><th>planete_arrivee</th><th>id_ship</th><th>day</th><th>time</th></tr>
-    <?php
-    foreach ($trips as $trip) {
-        echo '<tr><td>' . $trip['planete_depart'] . '</td><td>' . $trip['planete_arrivee'] . '</td><td>' . $trip['id_ship'] . '</td><td>' . $trip['day'] . '</td><td>' . $trip['time'] . '</td></tr>';
-    }
-    ?>
-</table>
 
 </body>
-
-<script>
-    $(function() {
-        $("#search").autocomplete({
-            source: function(request, response) {
-                $.ajax({
-                    url: "search.php",
-                    dataType: "json",
-                    data: {
-                        term: request.term
-                    },
-                    success: function(data) {
-                        response(data);
-                    }
-                });
-            },
-            minLength: 2
-        });
-    });
-</script>
 
 </html>

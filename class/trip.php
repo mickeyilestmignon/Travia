@@ -26,3 +26,15 @@ class trip {
     public function getTime(): string
     { return $this->time; }
 }
+
+function print_trips_in_database() {
+    global $cnx;
+    $stmt = $cnx->query("SELECT * FROM trips");
+    $trips = $stmt->fetchAll();
+    echo "<table>";
+    echo "<tr><th>planete_depart</th><th>planete_arrivee</th><th>id_ship</th><th>day</th><th>time</th></tr>";
+    foreach ($trips as $trip) {
+        echo '<tr><td>' . $trip['planete_depart'] . '</td><td>' . $trip['planete_arrivee'] . '</td><td>' . $trip['id_ship'] . '</td><td>' . $trip['day'] . '</td><td>' . $trip['time'] . '</td></tr>';
+    }
+    echo "</table>";
+}
