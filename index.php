@@ -12,17 +12,25 @@ include 'class/planet.php';
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" type="text/css" href="index.css"/>
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
     <title>Index</title>
 </head>
 <body>
 
 <nav>
+    <a href="#recherche">Recherche</a>
     <a href="#vaisseaux">Vaisseaux</a>
     <a href="#planetes">Planètes</a>
     <a href="#voyages">Voyages</a>
 </nav>
 
 <br><br>
+
+<h1 id="recherche">Recherche</h1>
+
+<label for="search"></label><input type="text" id="search">
 
 <h1 id="vaisseaux">Les vaiseaux</h1>
 
@@ -84,4 +92,25 @@ $trips = $stmt->fetchAll();
 </table>
 
 </body>
+
+<script>
+    $(function() {
+        $("#search").autocomplete({
+            source: function(request, response) {
+                $.ajax({
+                    url: "search.php",
+                    dataType: "json",
+                    data: {
+                        term: request.term
+                    },
+                    success: function(data) {
+                        response(data);
+                    }
+                });
+            },
+            minLength: 2
+        });
+    });
+</script>
+
 </html>
