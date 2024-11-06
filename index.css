@@ -1,4 +1,5 @@
 /* clean looking tables with borders and alternating colors */
+
 table {
     border-collapse: collapse;
     width: 100%;
@@ -8,7 +9,7 @@ table {
 }
 
 th {
-    background-color: #f2f2f2;
+    background-color: #d9d9d9;
 }
 
 th, td {
@@ -18,5 +19,38 @@ th, td {
 }
 
 tr:nth-child(even) {
-    background-color: #d9d9d9;
+    background-color: #f2f2f2;
+}
+
+/* Fixed clean horizontal navbar */
+
+nav {
+    overflow: hidden;
+    background-color: #333;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+}
+
+nav a {
+    float: left;
+    display: block;
+    color: #f2f2f2;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+}
+
+nav a:hover {
+    background: #ddd;
+    color: black;
+}
+
+/* fix html page margin and unified font */
+
+html {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
 }

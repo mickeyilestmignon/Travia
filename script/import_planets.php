@@ -8,10 +8,11 @@ include '../class/planet.php';
 // Truncate planets table and insert planets from json file
 
 $cnx->exec("TRUNCATE TABLE planets");
+$cnx->exec("TRUNCATE TABLE trips");
 
 if (isset($_POST['submit'])) {
     $planets = get_json_planets($_FILES['fileToUpload']['tmp_name']);
-    $stmt = $cnx->prepare("INSERT INTO planets (id, name, image, coord, X, Y, SubGridCoord, SubGridX, SubGridY, region, sector, suns, moons, position, distance, LengthDay, LengthYear, diameter, gravity, trips) VALUES (:id, :name, :image, :coord, :X, :Y, :SubGridCoord, :SubGridX, :SubGridY, :region, :sector, :suns, :moons, :position, :distance, :LengthDay, :LengthYear, :diameter, :gravity, :trips)");
+    $stmt = $cnx->prepare("INSERT INTO planets (id, name, image, coord, X, Y, SubGridCoord, SubGridX, SubGridY, region, sector, suns, moons, position, distance, LengthDay, LengthYear, diameter, gravity) VALUES (:id, :name, :image, :coord, :X, :Y, :SubGridCoord, :SubGridX, :SubGridY, :region, :sector, :suns, :moons, :position, :distance, :LengthDay, :LengthYear, :diameter, :gravity)");
     $count = 0;
     foreach ($planets as $planet) {
 
@@ -34,8 +35,6 @@ if (isset($_POST['submit'])) {
         $LengthYear = $planet->getLengthYear();
         $diameter = $planet->getDiameter();
         $gravity = $planet->getGravity();
-        //$trips = $planet->getTrips();
-        $trips = 'TEMP';
 
         $stmt->bindParam(':id', $id, PDO::PARAM_INT);
         $stmt->bindParam(':name', $name, PDO::PARAM_STR);
@@ -56,7 +55,6 @@ if (isset($_POST['submit'])) {
         $stmt->bindParam(':LengthYear', $LengthYear, PDO::PARAM_INT);
         $stmt->bindParam(':diameter', $diameter, PDO::PARAM_INT);
         $stmt->bindParam(':gravity', $gravity, PDO::PARAM_INT);
-        $stmt->bindParam(':trips', $trips, PDO::PARAM_STR);
         $stmt->execute();
         $count++;
     }

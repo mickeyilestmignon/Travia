@@ -4,9 +4,9 @@
 // Class object planet, method import planet -> database
 // Method display planets from the database
 
-use Cassandra\Map;
-
+global $cnx;
 include_once $_SERVER['DOCUMENT_ROOT'] . '/TraviaProject/include/connect.inc.php';
+set_time_limit(600);
 
 class planet {
     private int $id;
@@ -31,7 +31,7 @@ class planet {
     private array $trips;
 
     // constructor
-    function __construct($id, $name, $image, $coord, $X, $Y, $SubGridCoord, $SubGridX, $SubGridY, $region, $sector, $suns, $moons, $position, $distance, $LengthDay, $LengthYear, $diameter, $gravity, $trips) {
+    function __construct($id, $name, $image, $coord, $X, $Y, $SubGridCoord, $SubGridX, $SubGridY, $region, $sector, $suns, $moons, $position, $distance, $LengthDay, $LengthYear, $diameter, $gravity) {
         $this->id = $id;
         $this->name = $name;
         $this->image = $image;
@@ -51,7 +51,6 @@ class planet {
         $this->LengthYear = $LengthYear;
         $this->diameter = $diameter;
         $this->gravity = $gravity;
-        $this->trips = $trips;
     }
 
     // getters
@@ -94,14 +93,13 @@ class planet {
     { return $this->diameter; }
     public function getGravity(): int
     { return $this->gravity; }
-    public function getTrips(): array
-    { return $this->trips; }
 }
 
 // Function to import planets from a json file
 
 function get_json_planets($json): array
 {
+    global $cnx;
     $json = file_get_contents($json);
     $data = json_decode($json, true);
     $planets = array();
@@ -122,7 +120,29 @@ function get_json_planets($json): array
             $Coord = $planet['Coord'];
         }
 
-        $planets[] = new planet($planet['Id'], $planet['Name'], $Image, $Coord, $planet['X'], $planet['Y'], $SubGridCoord, $planet['SubGridX'], $planet['SubGridY'], $planet['Region'], $planet['Sector'], $planet['Suns'], $planet['Moons'], $planet['Position'], $planet['Distance'], $planet['LengthDay'], $planet['LengthYear'], $planet['Diameter'], $planet['Gravity'], $planet['trips']);
+        // Import des trips
+
+        if (array_key_exists('trips', $planet)) {
+            foreach ($planet['trips'] as $day => $trips) {
+                foreach ($trips as $trip) {
+                    $destination_planet_id = $trip['destination_planet_id'][0];
+                    $departure_time = $trip['departure_time'][0];
+                    $ship = $trip['ship_id'][0];
+
+                    // insert in trips table
+
+                    $stmt = $cnx->prepare("INSERT INTO trips(planete_depart, planete_arrivee, id_ship, day, time) VALUES (:planete_depart, :planete_arrivee, :id_ship, :day, :time)");
+                    $stmt->bindParam(':planete_depart', $planet['Id'], PDO::PARAM_INT);
+                    $stmt->bindParam(':planete_arrivee', $destination_planet_id, PDO::PARAM_INT);
+                    $stmt->bindParam(':id_ship', $ship, PDO::PARAM_INT);
+                    $stmt->bindParam(':day', $day, PDO::PARAM_STR);
+                    $stmt->bindParam(':time', $departure_time);
+                    $stmt->execute();
+                }
+            }
+        }
+
+        $planets[] = new planet($planet['Id'], $planet['Name'], $Image, $Coord, $planet['X'], $planet['Y'], $SubGridCoord, $planet['SubGridX'], $planet['SubGridY'], $planet['Region'], $planet['Sector'], $planet['Suns'], $planet['Moons'], $planet['Position'], $planet['Distance'], $planet['LengthDay'], $planet['LengthYear'], $planet['Diameter'], $planet['Gravity']);
     }
     return $planets;
 }
@@ -134,9 +154,9 @@ function print_planets_in_database() {
     $planets = $stmt->fetchAll();
 
     echo '<table>';
-    echo '<tr><th>image</th><th>name</th><th>image</th><th>coord</th><th>X</th><th>Y</th><th>SubGridCoord</th><th>SubGridX</th><th>SubGridY</th><th>region</th><th>sector</th><th>suns</th><th>moons</th><th>position</th><th>distance</th><th>LengthDay</th><th>LengthYear</th><th>diameter</th><th>gravity</th><th>trips</th></tr>';
+    echo '<tr><th>image</th><th>name</th><th>image</th><th>coord</th><th>X</th><th>Y</th><th>SubGridCoord</th><th>SubGridX</th><th>SubGridY</th><th>region</th><th>sector</th><th>suns</th><th>moons</th><th>position</th><th>distance</th><th>LengthDay</th><th>LengthYear</th><th>diameter</th><th>gravity</th></tr>';
     foreach ($planets as $planet) {
-        echo '<tr><td><img src="https://static.wikia.nocookie.net/starwars/images/'.substr(md5($planet['image']), 0, 1).'/'.substr(md5($planet['image']), 0, 2).'/'.$planet['image'].'" alt=""></td><td>' . $planet['name'] . '</td><td>' . $planet['image'] . '</td><td>' . $planet['coord'] . '</td><td>' . $planet['X'] . '</td><td>' . $planet['Y'] . '</td><td>' . $planet['SubGridCoord'] . '</td><td>' . $planet['SubGridX'] . '</td><td>' . $planet['SubGridY'] . '</td><td>' . $planet['region'] . '</td><td>' . $planet['sector'] . '</td><td>' . $planet['suns'] . '</td><td>' . $planet['moons'] . '</td><td>' . $planet['position'] . '</td><td>' . $planet['distance'] . '</td><td>' . $planet['LengthDay'] . '</td><td>' . $planet['LengthYear'] . '</td><td>' . $planet['diameter'] . '</td><td>' . $planet['gravity'] . '</td><td>' . $planet['trips'] . '</td></tr>';
+        echo '<tr><td><img src="https://static.wikia.nocookie.net/starwars/images/'.substr(md5($planet['image']), 0, 1).'/'.substr(md5($planet['image']), 0, 2).'/'.$planet['image'].'" alt=""></td><td>' . $planet['name'] . '</td><td>' . $planet['image'] . '</td><td>' . $planet['coord'] . '</td><td>' . $planet['X'] . '</td><td>' . $planet['Y'] . '</td><td>' . $planet['SubGridCoord'] . '</td><td>' . $planet['SubGridX'] . '</td><td>' . $planet['SubGridY'] . '</td><td>' . $planet['region'] . '</td><td>' . $planet['sector'] . '</td><td>' . $planet['suns'] . '</td><td>' . $planet['moons'] . '</td><td>' . $planet['position'] . '</td><td>' . $planet['distance'] . '</td><td>' . $planet['LengthDay'] . '</td><td>' . $planet['LengthYear'] . '</td><td>' . $planet['diameter'] . '</td><td>' . $planet['gravity'] . '</td></tr>';
     }
     echo '</table>';
 }
