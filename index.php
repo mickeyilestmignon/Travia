@@ -7,7 +7,7 @@ include 'class/trip.php';
 ?>
 
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -21,22 +21,24 @@ include 'class/trip.php';
 <body>
 
 <nav>
-    <a href="#recherche">Recherche</a>
-    <a href="#vaisseaux">Vaisseaux</a>
-    <a href="#planetes">Planètes</a>
-    <a href="#voyages">Voyages</a>
+    <a href="#recherche">Search</a>
+    <a href="#vaisseaux">Ships</a>
+    <a href="#planetes">Planets</a>
+    <a href="#voyages">Trips</a>
 </nav>
 
 <br><br>
 
-<h1 id="recherche">Recherche</h1>
+<h1 id="recherche">Search</h1>
 
-<form action="search_results.php" method="get">
-    <label for="search">Planète de départ</label>
-    <input type="text" id="depart" name="depart">
+<form action="script/logsearch.php" method="get">
+    <label for="search">Departure planet
+        <input type="text" id="depart" name="depart">
+    </label>
 
-    <label for="search">Planète de d'arrivée</label>
-    <input type="text" id="arrivee" name="arrivee">
+    <label for="search">Arrival planet
+        <input type="text" id="arrivee" name="arrivee">
+    </label>
 
     <input type="submit" value="Rechercher">
 </form>
@@ -77,11 +79,11 @@ include 'class/trip.php';
     });
 </script>
 
-<h1 id="vaisseaux">Les vaiseaux</h1>
+<h1 id="vaisseaux">Ships</h1>
 
-<h2>Importer des vaiseaux : (charger un json)</h2>
+<h2>Import ships : (load json)</h2>
 <form action="../TraviaProject/script/import_ships.php" method="post" enctype="multipart/form-data">
-    Selectionner un fichier json de vaisseaux à importer :
+    Select json file to import :
     <input type="file" name="fileToUpload" id="fileToUpload">
     <input type="submit" value="Importer les vaisseaux" name="submit">
 </form><br>
@@ -89,21 +91,21 @@ include 'class/trip.php';
 <?php
 if (isset($_GET['return_ships'])) {
     if ($_GET['return_ships'] == -1) {
-        echo 'Erreur lors de l\'importation des vaisseaux';
+        echo 'Error importing ships';
     }
     else {
-        echo 'Importation de ' . $_GET['return_ships'] . ' vaisseaux réussie';
+        echo 'Import of ' . $_GET['return_ships'] . ' ships succesful';
     }
 }
 
-//print_ships_in_database($cnx);
+print_ships_in_database($cnx);
 ?>
 
-<h1 id="planetes">Les planètes</h1>
+<h1 id="planetes">Planets</h1>
 
-<h2>Importer des planètes : (charger un json)</h2>
+<h2>Import planets : (load json)</h2>
 <form action="../TraviaProject/script/import_planets.php" method="post" enctype="multipart/form-data">
-    Selectionner un fichier json de planètes à importer :
+    Select json file to import :
     <input type="file" name="fileToUpload" id="fileToUpload">
     <input type="submit" value="Importer les planètes" name="submit">
 </form><br>
@@ -111,17 +113,17 @@ if (isset($_GET['return_ships'])) {
 <?php
 if (isset($_GET['return_planets'])) {
     if ($_GET['return_planets'] == -1) {
-        echo 'Erreur lors de l\'importation des planètes';
+        echo 'Error importing planets';
     }
     else {
-        echo 'Importation de ' . $_GET['return_planets'] . ' planètes réussie';
+        echo 'Import of ' . $_GET['return_planets'] . ' planets succesful';
     }
 }
 
-//print_planets_in_database($cnx);
+//print_planets_in_database();
 ?>
 
-<h1 id="voyages">Les voyages</h1>
+<h1 id="voyages">Trips</h1>
 
 <?php
 //print_trips_in_database();
