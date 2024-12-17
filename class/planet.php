@@ -120,7 +120,7 @@ function get_json_planets($json): array
             $Coord = $planet['Coord'];
         }
 
-        // Import des trips
+        // Trips import
 
         if (array_key_exists('trips', $planet)) {
             foreach ($planet['trips'] as $day => $trips) {
@@ -145,6 +145,14 @@ function get_json_planets($json): array
         $planets[] = new planet($planet['Id'], $planet['Name'], $Image, $Coord, $planet['X'], $planet['Y'], $SubGridCoord, $planet['SubGridX'], $planet['SubGridY'], $planet['Region'], $planet['Sector'], $planet['Suns'], $planet['Moons'], $planet['Position'], $planet['Distance'], $planet['LengthDay'], $planet['LengthYear'], $planet['Diameter'], $planet['Gravity']);
     }
     return $planets;
+}
+
+function getPlanetInfo ($id): array {
+    global $cnx;
+    $stmt = $cnx->prepare("SELECT * FROM planets WHERE id = :id");
+    $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+    $stmt->execute();
+    return $stmt->fetch();
 }
 
 function print_planets_in_database() {

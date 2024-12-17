@@ -40,6 +40,14 @@ function get_json_ships($json): array
     return $ships;
 }
 
+function getShipInfo ($id): array {
+    global $cnx;
+    $stmt = $cnx->prepare("SELECT * FROM ships WHERE id = :id");
+    $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+    $stmt->execute();
+    return $stmt->fetch();
+}
+
 function print_ships_in_database($cnx) {
     $stmt = $cnx->prepare("SELECT * FROM ships");
     $stmt->execute();

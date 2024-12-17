@@ -1,56 +1,284 @@
-/* clean looking tables with borders and alternating colors */
-
-table {
-    border-collapse: collapse;
-    width: 100%;
-    margin: 0 auto;
-    border-style: solid;
-    border-color: black;
+@font-face {
+    font-family: 'Aurebesh';
+    src: url('font/aurebesh/Aurebesh.otf');
 }
 
-th {
-    background-color: #d9d9d9;
-}
-
-th, td {
-    border: 1px solid #ddd;
-    text-align: left;
-    padding: 8px;
-}
-
-tr:nth-child(even) {
-    background-color: #f2f2f2;
-}
-
-/* Fixed clean horizontal navbar */
-
-nav {
-    overflow: hidden;
-    background-color: #333;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-}
-
-nav a {
-    float: left;
-    display: block;
-    color: #f2f2f2;
-    text-align: center;
-    padding: 14px 16px;
-    text-decoration: none;
-}
-
-nav a:hover {
-    background: #ddd;
-    color: black;
-}
-
-/* fix html page margin and unified font */
-
-html {
-    font-family: Arial, sans-serif;
+body {
     margin: 0;
     padding: 0;
+    background-image: url("images/bg.jpg");
+    background-size: cover;
 }
+
+.navbar {
+    color: #FFFFFF;
+    background-color: #000000;
+    overflow: hidden;
+    height: 12.5vh;
+    font-size: 20px;
+}
+
+.navbar a {
+    float: left;
+    color: #FFFFFF;
+    text-align: center;
+}
+
+/* Font Selector */
+
+.fontSelector {
+    position: absolute;
+    top: 22%;
+    left: 0;
+    padding: 10px;
+
+    background-color: #FFFFFF;
+    border: solid 5px #FFFFFF;
+    border-radius: 0px 10px 10px 0px;
+}
+
+.fontSelector:hover {
+    border: solid 5px #D9D9D9;
+    transition-duration: 250ms;
+}
+
+/* Box */
+
+.box {
+    position: absolute;
+    width: 60%;
+    height: 60%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    border: solid 5px #FFFFFF;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.5);
+
+    text-align: center;
+    color: #FFFFFF;
+}
+
+.box .p1 {
+    position: absolute;
+    top: 5%;
+    left: 20%;
+    transform: translateX(-50%);
+
+    font-size: 1.5vw;
+}
+
+.box .p2 {
+    position: absolute;
+    top: 5%;
+    right: 20%;
+    transform: translateX(50%);
+
+    font-size: 1.5vw;
+}
+
+.box .p1_name {
+    position: absolute;
+    top: 5%;
+    left: 20%;
+    transform: translateX(-50%);
+
+    font-size: 3vw;
+    font-weight: bold;
+}
+
+.box .p2_name {
+    position: absolute;
+    top: 5%;
+    right: 20%;
+    transform: translateX(50%);
+
+    font-size: 3vw;
+    font-weight: bold;
+}
+
+.box .p1_image {
+    position: absolute;
+    top: 25%;
+    left: 20%;
+    transform: translateX(-50%);
+
+    width: 30%;
+}
+
+.box .p2_image {
+    position: absolute;
+    top: 25%;
+    right: 20%;
+    transform: translateX(50%);
+
+    width: 30%;
+}
+
+.box .p1_description {
+    position: absolute;
+    bottom: 2.5%;
+    left: 20%;
+    transform: translateX(-50%);
+
+    font-size: 1vw;
+}
+
+.box .p2_description {
+    position: absolute;
+    bottom: 2.5%;
+    right: 20%;
+    transform: translateX(50%);
+
+    font-size: 1vw;
+}
+
+.box .submit {
+    position: absolute;
+    bottom: 5%;
+    left: 50%;
+    transform: translateX(-50%);
+
+    background-color: #FFFFFF;
+    border: solid 5px #FFFFFF;
+    border-radius: 10px;
+    padding: 5px;
+
+    color: #000000;
+    font-size: 1.25vw;
+    font-weight: bold;
+}
+
+.box .submit:hover {
+    border: solid 5px #D9D9D9;
+    transition-duration: 250ms;
+}
+
+.box .trip-symbol {
+    position: absolute;
+    top: 25%;
+    left: 50%;
+    transform: translateX(-50%);
+
+    width: 20%;
+}
+
+/* Results */
+
+.results {
+    position: absolute;
+    width: 60%;
+    height: 160%;
+    top: 165%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    border: solid 5px #FFFFFF;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.5);
+
+    text-align: center;
+    color: #FFFFFF;
+}
+
+.results .title {
+    display: block;
+
+    font-size: 3vw;
+    font-weight: bold;
+}
+
+.results .distance {
+    display: block;
+    margin-top: 10px;
+
+    font-size: 1.5vw;
+}
+
+.results .ship {
+    display: inline-block;
+
+    border: solid 5px #FFFFFF;
+    border-radius: 10px;
+    padding: 5px;
+    margin: 10px;
+
+    width: 45%;
+    height:14%;
+}
+
+.results .ship .ship-name {
+    background-color: #FFFFFF;
+    color: #000000;
+    top: 0;
+    left: 0;
+
+    font-size: 1.5vw;
+    font-weight: bold;
+}
+
+.results .ship .info {
+    margin: 16px;
+}
+
+.results .add-basket {
+    display: inline-block;
+
+    background-color: #21ba21;
+    border: solid 5px #21ba21;
+    border-radius: 5px;
+
+    width: 10%;
+
+    color: #FFFFFF;
+    font-weight: bold;
+}
+
+.results .add-basket img {
+    width: 100%;
+    height: 100%;
+}
+
+.results .add-basket:hover {
+    border: solid 5px #157515;
+    transition-duration: 250ms;
+}
+
+.results .sortButton {
+    display: inline-block;
+    top: 20%;
+    left: 50%;
+
+    background-color: #FFFFFF;
+    border: solid 5px #FFFFFF;
+    border-radius: 10px;
+    padding: 5px;
+    color: #000000;
+    font-weight: bold;
+}
+
+.results .sortButton:hover {
+    border: solid 5px #D9D9D9;
+    transition-duration: 250ms;
+}
+
+/* on phone screen size */
+
+@media screen and (max-width: 800px) {
+    .box {
+        width: 90%;
+        height: 40%;
+
+        top: 40%;
+    }
+
+    .results {
+        width: 90%;
+        height: 40%;
+
+        top: 85%;
+    }
+}
+
+/* --- */

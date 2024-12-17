@@ -7,40 +7,48 @@ include 'class/trip.php';
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" onload="loadFont()">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" type="text/css" href="index.css"/>
+
     <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
     <title>Index</title>
 </head>
+
 <body>
 
-<nav>
-    <a href="#recherche">Search</a>
-    <a href="#vaisseaux">Ships</a>
-    <a href="#planetes">Planets</a>
-    <a href="#voyages">Trips</a>
+<nav class="navbar navbar-default">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand"><img src="images/logo.png" alt="" width="250"></a>
+        </div>
+        <ul class="nav navbar-nav">
+            <li>Sheev Palpatine</li>
+        </ul>
+    </div>
 </nav>
 
-<br><br>
-
-<h1 id="recherche">Search</h1>
+<?php
+include('include/fontSelector.php');
+?>
 
 <form action="script/logsearch.php" method="get">
-    <label for="search">Departure planet
-        <input type="text" id="depart" name="depart">
-    </label>
 
-    <label for="search">Arrival planet
-        <input type="text" id="arrivee" name="arrivee">
-    </label>
+    <div class="box">
+        <input class="p1" type="text" id="depart" name="departure" placeholder="Departure" required>
+        <input class="p2" type="text" id="arrivee" name="arrival" placeholder="Arrival" required>
+        <input class="submit" type="submit" value="Search">
+    </div>
 
-    <input type="submit" value="Rechercher">
 </form>
 
 <script>
@@ -78,56 +86,6 @@ include 'class/trip.php';
         });
     });
 </script>
-
-<h1 id="vaisseaux">Ships</h1>
-
-<h2>Import ships : (load json)</h2>
-<form action="../TraviaProject/script/import_ships.php" method="post" enctype="multipart/form-data">
-    Select json file to import :
-    <input type="file" name="fileToUpload" id="fileToUpload">
-    <input type="submit" value="Importer les vaisseaux" name="submit">
-</form><br>
-
-<?php
-if (isset($_GET['return_ships'])) {
-    if ($_GET['return_ships'] == -1) {
-        echo 'Error importing ships';
-    }
-    else {
-        echo 'Import of ' . $_GET['return_ships'] . ' ships succesful';
-    }
-}
-
-print_ships_in_database($cnx);
-?>
-
-<h1 id="planetes">Planets</h1>
-
-<h2>Import planets : (load json)</h2>
-<form action="../TraviaProject/script/import_planets.php" method="post" enctype="multipart/form-data">
-    Select json file to import :
-    <input type="file" name="fileToUpload" id="fileToUpload">
-    <input type="submit" value="Importer les planètes" name="submit">
-</form><br>
-
-<?php
-if (isset($_GET['return_planets'])) {
-    if ($_GET['return_planets'] == -1) {
-        echo 'Error importing planets';
-    }
-    else {
-        echo 'Import of ' . $_GET['return_planets'] . ' planets succesful';
-    }
-}
-
-//print_planets_in_database();
-?>
-
-<h1 id="voyages">Trips</h1>
-
-<?php
-//print_trips_in_database();
-?>
 
 </body>
 
