@@ -168,3 +168,10 @@ function print_planets_in_database() {
     }
     echo '</table>';
 }
+
+function getAllPlanetsInfo() : array {
+    global $cnx;
+    $stmt = $cnx->prepare("SELECT * FROM planets");
+    $stmt->execute();
+    return $stmt->fetchAll();
+}

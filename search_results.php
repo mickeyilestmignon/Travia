@@ -1,7 +1,12 @@
 <?php
-if (!isset($_GET['depart']) && isset($_GET['arrivee'])) {
+if (!isset($_GET['departure']) || !isset($_GET['arrival'])) {
     header("Location: index.php");
 }
+
+if (!isset($_COOKIE['cart'])) {
+    setcookie('cart', serialize([]), time() + 7200, '/');
+}
+
 global $cnx;
 include("include/connect.inc.php");
 include 'class/ship.php';
@@ -16,10 +21,43 @@ function toHoursMintues($duration) : string {
     $minutes = floor(($duration - $hours) * 60);
     return $hours . 'h ' . $minutes . 'm';
 }
+
+function regionToColor($region) : string {
+    switch ($region) {
+        case "Colonies":
+            return "#FA6F74";
+        case "Core":
+            return "#E98900";
+        case "Deep Core":
+            return "#C09F06";
+        case "Expansion Region":
+            return "#96B011";
+        case "Extragalactic":
+            return "#22C104";
+        case "Hutt Space":
+            return "#09C47D";
+        case "Inner Rim Territories":
+            return "#00C4A8";
+        case "Mid Rim Territories":
+            return "#01BBE1";
+        case "Outer Rim Territories":
+            return "#00A7FF";
+        case "Talcene Sector":
+            return "#8F8FFF";
+        case "The Centrality":
+            return "#CE6FFD";
+        case "Tingel Arm":
+            return "#EF60DC";
+        case "Wild Space":
+            return "#FF60AC";
+        default:
+            return "white";
+    }
+}
 ?>
 
 <!DOCTYPE html>
-<html lang="en" onload="loadFont()">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -33,6 +71,8 @@ function toHoursMintues($duration) : string {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <title>Results</title>
 </head>
 
@@ -45,26 +85,33 @@ function toHoursMintues($duration) : string {
         url.searchParams.set('sort', selectedValue);
         window.location.href = url.href;
     }
+
+    // Keep scroll position on page reload
+
+    document.addEventListener("DOMContentLoaded", function(event) {
+        var scrollpos = localStorage.getItem('scrollpos');
+        if (scrollpos) window.scrollTo(0, scrollpos, 'instant');
+    });
+
+    window.onbeforeunload = function(e) {
+        localStorage.setItem('scrollpos', window.scrollY);
+    };
 </script>
 
 <body>
 
-<nav class="navbar navbar-default">
-    <div class="container-fluid">
-        <div class="navbar-header">
-            <a class="navbar-brand"><img src="images/logo.png" alt="" width="250"></a>
-        </div>
-        <ul class="nav navbar-nav">
-            <li>Sheev Palpatine</li>
-        </ul>
-    </div>
-</nav>
-
 <?php
+include('include/navbar.php');
 include('include/fontSelector.php');
+include('include/cart.php');
 ?>
 
+<script>
+    loadFont();
+</script>
+
 <div class="box">
+
     <p class="p1_name"> <?php echo $departure["name"]; ?> </p>
     <p class="p2_name"> <?php echo $arrival["name"]; ?> </p>
 
@@ -132,9 +179,11 @@ include('include/fontSelector.php');
                 Duration : <?php echo toHoursMintues($duration); ?><br>
                 Price : <?php echo $cost; ?> credits
             </div>
-            <div class="add-basket">
-                <img src="images/add-to-cart.png">
-            </div>
+            <a href="include/addToCart.php?departure=<?php echo $_GET['departure']; ?>&arrival=<?php echo $_GET['arrival']; ?>&ship=<?php echo $ship->getId(); ?>">
+                <div class="add-basket">
+                    <img src="images/add-to-cart.png">
+                </div>
+            </a>
         </div>
 
         <?php
@@ -142,6 +191,85 @@ include('include/fontSelector.php');
 
     ?>
 
+</div>
+
+<div class="map">
+    <div id="map"></div>
+    <script>
+        var map = L.map('map', {
+            crs: L.CRS.Simple,
+            minZoom: 3
+        });
+
+        var bounds = [[0,0], [125,125]];
+        var maxBounds = [[0,-5], [132.5, 125]];
+
+        map.fitBounds(bounds);
+        map.setMaxBounds(maxBounds);
+
+        var yx = L.latLng;
+
+        var xy = function(x, y) {
+            if (Array.isArray(x)) {    // When doing xy([x, y]);
+                return yx(x[1], x[0]);
+            }
+            return yx(y, x);  // When doing xy(x, y);
+        };
+    </script>
+
+    <?php
+    $planetsPositions = getAllPlanetsInfo();
+    foreach ($planetsPositions as $planet) {
+        ?>
+        <script>
+            var planet = L.circle([<?php echo (($planet["Y"]+$planet["SubGridY"])*6).", ".(($planet["X"]+$planet["SubGridX"])*6) ?>], {
+                color: "<?php echo regionToColor($planet["region"]); ?>",
+                fillOpacity: 1,
+                radius: <?php
+
+                    if ($planet["diameter"] >= 0 && $planet["diameter"] < 50000) {
+                        echo 0.005;
+                    } else if ($planet["diameter"] >= 50000 && $planet["diameter"] < 100000) {
+                        echo 0.01;
+                    } else if ($planet["diameter"] >= 100000 && $planet["diameter"] < 150000) {
+                        echo 0.02;
+                    } else if ($planet["diameter"] >= 150000 && $planet["diameter"] < 200000) {
+                        echo 0.04;
+                    } else if ($planet["diameter"] >= 200000 && $planet["diameter"] < 250000) {
+                        echo 0.08;
+                    } else if ($planet["diameter"] >= 250000) {
+                        echo 0.16;
+                    } else {
+                        echo 0.03;
+                    }
+
+                ?>
+            }).addTo(map);
+
+            <?php
+                if ($planet["id"] == $_GET['departure']) {
+
+                    $startY = (($planet["Y"]+$planet["SubGridY"])*6);
+                    $startX = (($planet["X"]+$planet["SubGridX"])*6);
+
+                    echo "L.marker(xy(".$startY.", ".$startX.")).addTo(map).bindPopup('".$planet["name"]."');";
+
+                } else if ($planet["id"] == $_GET['arrival']) {
+
+                    $endY = (($planet["Y"]+$planet["SubGridY"])*6);
+                    $endX = (($planet["X"]+$planet["SubGridX"])*6);
+
+                    echo "L.marker(xy(".$endY.", ".$endX.")).addTo(map).bindPopup('".$planet["name"]."');";
+
+                }
+                if (isset($startY) && isset($endY)) {
+                    echo "L.polyline([xy(".$startY.", ".$startX."), xy(".$endY.", ".$endX.")], {color: 'white'}).addTo(map);";
+                }
+            ?>
+        </script>
+        <?php
+    }
+    ?>
 </div>
 
 </body>

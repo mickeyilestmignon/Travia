@@ -26,27 +26,35 @@ include 'class/trip.php';
 
 <body>
 
-<nav class="navbar navbar-default">
-    <div class="container-fluid">
-        <div class="navbar-header">
-            <a class="navbar-brand"><img src="images/logo.png" alt="" width="250"></a>
-        </div>
-        <ul class="nav navbar-nav">
-            <li>Sheev Palpatine</li>
-        </ul>
-    </div>
-</nav>
-
 <?php
+include('include/navbar.php');
 include('include/fontSelector.php');
 ?>
+
+<script>
+    loadFont();
+
+    function loadImage1() {
+        var image1 = document.querySelector('.image_index_1');
+        image1.style.display = 'block';
+    }
+
+    function loadImage2() {
+        var image2 = document.querySelector('.image_index_2');
+        image2.style.display = 'block';
+    }
+</script>
 
 <form action="script/logsearch.php" method="get">
 
     <div class="box">
-        <input class="p1" type="text" id="depart" name="departure" placeholder="Departure" required>
-        <input class="p2" type="text" id="arrivee" name="arrival" placeholder="Arrival" required>
+        <input onchange="loadImage1()" class="p1" type="text" id="depart" name="departure" placeholder="Departure" required>
+        <input onchange="loadImage2()" class="p2" type="text" id="arrivee" name="arrival" placeholder="Arrival" required>
         <input class="submit" type="submit" value="Search">
+
+        <img class="image_index_1" src="images/trip.png" alt="">
+        <img class="image_index_2" src="images/trip.png" alt="">
+
     </div>
 
 </form>
