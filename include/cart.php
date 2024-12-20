@@ -1,3 +1,8 @@
+<?php
+global $departure;
+global $arrival;
+?>
+
 <script>
     function showCart() {
         var cart = document.querySelector('.cartDetail');
@@ -20,14 +25,42 @@
                 echo '<p>Your cart is empty</p>';
             }
             else {
+                echo "You have ".count($cart)." items in your cart<br>";
+                echo "<a href='checkout.php'>Checkout</a><br>";
                 foreach ($cart as $item) {
-                    echo $item['departure'].' - '.$item['arrival'].' - '.$item['ship'].'<br>';
+                    ?>
+                    <div class="cartItem">
+                        <div class="cartItemDeparture"><?php
+                            echo "<b>From</b> ".$departure["name"];
+                            ?></div>
+                        <div class="cartItemArrival"><?php
+                            echo "<b>To</b> ".$arrival["name"];
+                            ?></div>
+                        <div class="cartItemShip"><?php
+                            // get ship name from database
+                            $stmt = $cnx->prepare("SELECT name FROM ships WHERE id = :id");
+                            $shipCart = $item->getShip();
+                            $stmt->bindParam(':id', $shipCart, PDO::PARAM_INT);
+                            $stmt->execute();
+                            $ship = $stmt->fetch();
+                            echo "<b>With</b> ".$ship['name'];
+                            ?></div>
+                        <div class="cartItemQuantity"><?php
+                            // input type number changing quantity
+                            echo "<b>Quantity</b> ".$item->getQuantity();
+                            ?>
+                        </div>
+                        <div class="cartItemDelete">
+                            <a href="include/deleteCartItem.php?id=<?php echo $item->getId(); ?>">Delete</a>
+                        </div>
+                    </div>
+                    <?php
                 }
+                echo "<a href='include/deleteCart.php'>Empty cart</a>";
             }
         } else {
             echo '<p>Your cart is empty</p>';
         }
-        echo "<a href='include/deleteCart.php'>Delete cart</a>";
         ?>
     </div>
 </div>

@@ -12,6 +12,7 @@ include("include/connect.inc.php");
 include 'class/ship.php';
 include 'class/planet.php';
 include 'class/trip.php';
+include 'class/cart.php';
 
 $departure = getPlanetInfo($_GET['departure']);
 $arrival = getPlanetInfo($_GET['arrival']);
@@ -106,6 +107,8 @@ include('include/fontSelector.php');
 include('include/cart.php');
 ?>
 
+<div class="scroll">
+
 <script>
     loadFont();
 </script>
@@ -170,7 +173,6 @@ include('include/cart.php');
         $duration = $distance*1000000000 / $ship->getSpeedKmh();
         $cost = 100 * $distance;
         $cost = round($cost + ($cost * ($ship->getSpeedKmh() - 1080000000) / 1080000000), 2);
-
         ?>
 
         <div class="ship">
@@ -202,7 +204,7 @@ include('include/cart.php');
         });
 
         var bounds = [[0,0], [125,125]];
-        var maxBounds = [[0,-5], [132.5, 125]];
+        var maxBounds = [[-5,0], [125, 130]];
 
         map.fitBounds(bounds);
         map.setMaxBounds(maxBounds);
@@ -222,7 +224,7 @@ include('include/cart.php');
     foreach ($planetsPositions as $planet) {
         ?>
         <script>
-            var planet = L.circle([<?php echo (($planet["Y"]+$planet["SubGridY"])*6).", ".(($planet["X"]+$planet["SubGridX"])*6) ?>], {
+            var planet = L.circle(xy(<?php echo (($planet["Y"]+$planet["SubGridY"])*6).", ".(($planet["X"]+$planet["SubGridX"])*6) ?>), {
                 color: "<?php echo regionToColor($planet["region"]); ?>",
                 fillOpacity: 1,
                 radius: <?php
@@ -244,7 +246,10 @@ include('include/cart.php');
                     }
 
                 ?>
-            }).addTo(map);
+            }).addTo(map).bindPopup('<?php
+                echo $planet["name"];
+                echo '<img class="popupImage" src="https://static.wikia.nocookie.net/starwars/images/'.substr(md5($planet['image']), 0, 1).'/'.substr(md5($planet['image']), 0, 2).'/'.$planet['image'].'" alt="">';
+            ?>');
 
             <?php
                 if ($planet["id"] == $_GET['departure']) {
@@ -252,14 +257,20 @@ include('include/cart.php');
                     $startY = (($planet["Y"]+$planet["SubGridY"])*6);
                     $startX = (($planet["X"]+$planet["SubGridX"])*6);
 
-                    echo "L.marker(xy(".$startY.", ".$startX.")).addTo(map).bindPopup('".$planet["name"]."');";
+                    echo "L.marker(xy(".$startY.", ".$startX.")).addTo(map).bindPopup('";
+                    echo $planet["name"];
+                    echo '<img class="popupImage" src="https://static.wikia.nocookie.net/starwars/images/'.substr(md5($planet['image']), 0, 1).'/'.substr(md5($planet['image']), 0, 2).'/'.$planet['image'].'" alt="">';
+                    echo "');";
 
                 } else if ($planet["id"] == $_GET['arrival']) {
 
                     $endY = (($planet["Y"]+$planet["SubGridY"])*6);
                     $endX = (($planet["X"]+$planet["SubGridX"])*6);
 
-                    echo "L.marker(xy(".$endY.", ".$endX.")).addTo(map).bindPopup('".$planet["name"]."');";
+                    echo "L.marker(xy(".$endY.", ".$endX.")).addTo(map).bindPopup('";
+                    echo $planet["name"];
+                    echo '<img class="popupImage" src="https://static.wikia.nocookie.net/starwars/images/'.substr(md5($planet['image']), 0, 1).'/'.substr(md5($planet['image']), 0, 2).'/'.$planet['image'].'" alt="">';
+                    echo "');";
 
                 }
                 if (isset($startY) && isset($endY)) {
@@ -270,6 +281,8 @@ include('include/cart.php');
         <?php
     }
     ?>
+</div>
+
 </div>
 
 </body>
