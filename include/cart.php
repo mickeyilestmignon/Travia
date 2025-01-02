@@ -31,10 +31,10 @@ global $arrival;
                     ?>
                     <div class="cartItem">
                         <div class="cartItemDeparture"><?php
-                            echo "<b>From</b> ".$departure["name"];
+                            echo "<b>From</b> ".$item->getDeparture();
                             ?></div>
                         <div class="cartItemArrival"><?php
-                            echo "<b>To</b> ".$arrival["name"];
+                            echo "<b>To</b> ".$item->getArrival();
                             ?></div>
                         <div class="cartItemShip"><?php
                             // get ship name from database

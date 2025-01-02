@@ -72,6 +72,7 @@ body {
 .cartDetail {
     display: none;
     text-align: center;
+    z-index: 1;
 
     position: fixed;
     top: 15%;
@@ -93,6 +94,8 @@ body {
     border: solid 5px #D9D9D9;
     border-radius: 5px;
 
+    text-align: left;
+
     padding: 5px;
     margin-bottom: 5px;
 }
@@ -106,6 +109,7 @@ body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+    z-index: -1;
 
     border: solid 5px #FFFFFF;
     border-radius: 10px;
@@ -248,6 +252,7 @@ body {
     top: 165%;
     left: 50%;
     transform: translate(-50%, -50%);
+    z-index: -1;
 
     border: solid 5px #FFFFFF;
     border-radius: 10px;
@@ -349,6 +354,7 @@ body {
     top: 305%;
     left: 50%;
     transform: translate(-50%, -50%);
+    z-index: -1;
 
     border: solid 5px #FFFFFF;
     border-radius: 10px;
@@ -386,9 +392,16 @@ body {
 
     .results {
         width: 90%;
-        height: 40%;
+        height: 120%;
 
-        top: 85%;
+        top: 125%;
+    }
+
+    .map {
+        width: 90%;
+        height: 80%;
+
+        top: 230%;
     }
 }
 

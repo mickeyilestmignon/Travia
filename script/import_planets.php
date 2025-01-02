@@ -8,7 +8,6 @@ include '../class/planet.php';
 // Truncate planets table and insert planets from json file
 
 $cnx->exec("TRUNCATE TABLE planets");
-$cnx->exec("TRUNCATE TABLE trips");
 
 if (isset($_POST['submit'])) {
     $planets = get_json_planets($_FILES['fileToUpload']['tmp_name']);
@@ -58,8 +57,8 @@ if (isset($_POST['submit'])) {
         $stmt->execute();
         $count++;
     }
-    header('Location: ../index.php?return_planets='.$count);
+    header('Location: ../admin.php?return_planets='.$count);
 }
 else {
-    header('Location: ../index.php?return_planets=-1');
+    header('Location: ../admin.php?return_planets=-1');
 }

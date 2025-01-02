@@ -4,6 +4,7 @@ include 'include/connect.inc.php';
 include 'class/ship.php';
 include 'class/planet.php';
 include 'class/trip.php';
+include "class/cart.php";
 ?>
 
 <!DOCTYPE html>
@@ -29,6 +30,7 @@ include 'class/trip.php';
 <?php
 include('include/navbar.php');
 include('include/fontSelector.php');
+include('include/cart.php');
 ?>
 
 <script>

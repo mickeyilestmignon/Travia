@@ -27,8 +27,8 @@ if (isset($_POST['submit'])) {
         $stmt->execute();
         $count++;
     }
-    header('Location: ../index.php?return_ships='.$count);
+    header('Location: ../admin.php?return_ships='.$count);
 }
 else {
-    header('Location: ../index.php?return_ships=-1');
+    header('Location: ../admin.php?return_ships=-1');
 }
