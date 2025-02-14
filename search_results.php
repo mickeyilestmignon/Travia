@@ -1,6 +1,6 @@
 <?php
 if (!isset($_GET['departure']) || !isset($_GET['arrival'])) {
-    header("Location: index.php");
+    header("Location: search.php");
 }
 
 if (!isset($_COOKIE['cart'])) {
@@ -128,7 +128,7 @@ include('include/cart.php');
 
     <img class="trip-symbol" src="images/trip.png" alt="">
 
-    <a href="index.php"><div class="submit">Back to search</div></a>
+    <a href="search.php"><div class="submit">Back to search</div></a>
 </div>
 
 <div class="results">
@@ -284,6 +284,10 @@ include('include/cart.php');
 </div>
 
 </div>
+
+<?php
+include("include/footer.inc.php")
+?>
 
 </body>
 

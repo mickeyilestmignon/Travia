@@ -1,14 +1,6 @@
-<?php
-global $cnx;
-include 'include/connect.inc.php';
-include 'class/ship.php';
-include 'class/planet.php';
-include 'class/trip.php';
-include "class/cart.php";
-?>
-
 <!DOCTYPE html>
-<html lang="en" onload="loadFont()">
+
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -22,81 +14,46 @@ include "class/cart.php";
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
-    <title>Index</title>
+    <title>Login</title>
 </head>
 
 <body>
 
-<?php
-include('include/navbar.php');
-include('include/fontSelector.php');
-include('include/cart.php');
-?>
+    <div class="LoginDiv">
+      <h1>Login</h1>
 
-<script>
-    loadFont();
+      <form action="index.php" method="post">
 
-    function loadImage1() {
-        var image1 = document.querySelector('.image_index_1');
-        image1.style.display = 'block';
-    }
+        <input type="email" id="email" name="email" placeholder="Email" required>
 
-    function loadImage2() {
-        var image2 = document.querySelector('.image_index_2');
-        image2.style.display = 'block';
-    }
-</script>
+        <div class="LoginDivPassword">
+          <input type="password" id="password" name="password" placeholder="Password" required>
+          <input class="Checkbox" type="checkbox" onclick="showPassword()">
+        </div>
 
-<form action="script/logsearch.php" method="get">
+        <div class="LoginDivOptions">
+          <label for="rememberMe"><input type="checkbox" id="rememberMe" name="rememberMe" checked>Remember me</label>
+          <a href="forgotpassword.php">Forgot password ?</a>
+        </div>
 
-    <div class="box">
-        <input onchange="loadImage1()" class="p1" type="text" id="depart" name="departure" placeholder="Departure" required>
-        <input onchange="loadImage2()" class="p2" type="text" id="arrivee" name="arrival" placeholder="Arrival" required>
-        <input class="submit" type="submit" value="Search">
+        <input class="inputSubmit" type="submit" value="Login">
+      </form>
 
-        <img class="image_index_1" src="images/trip.png" alt="">
-        <img class="image_index_2" src="images/trip.png" alt="">
+      <a href="createaccount.php">Don't have an account ? Register</a>
 
     </div>
-
-</form>
-
-<script>
-    $(function() {
-        $("#depart").autocomplete({
-            source: function(request, response) {
-                $.ajax({
-                    url: "script/autocomplete_search.php",
-                    dataType: "json",
-                    data: {
-                        term: request.term
-                    },
-                    success: function(data) {
-                        response(data);
-                    }
-                });
-            },
-            minLength: 2
-        });
-
-        $("#arrivee").autocomplete({
-            source: function(request, response) {
-                $.ajax({
-                    url: "script/autocomplete_search.php",
-                    dataType: "json",
-                    data: {
-                        term: request.term
-                    },
-                    success: function(data) {
-                        response(data);
-                    }
-                });
-            },
-            minLength: 2
-        });
-    });
-</script>
 
 </body>
 
 </html>
+
+<script>
+  function showPassword() {
+    var password = document.getElementById("password");
+    if (password.type === "password") {
+      password.type = "text";
+    } else {
+      password.type = "password";
+    }
+  }
+</script>

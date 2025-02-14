@@ -1,6 +1,6 @@
 <?php
 
-include_once '/mnt/traban_home/3binf1/achirecesei/WWW/TraviaProject/include/connect.inc.php';
+include_once 'include/connect.inc.php';
 
 class ship {
     private int $id;

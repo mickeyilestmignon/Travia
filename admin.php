@@ -14,7 +14,7 @@ if (isset($_POST['email']) && isset($_POST['password'])) {
     $user = $stmt->fetch();
 
     if (!$user) {
-        header('Location: index.php');
+        header('Location: search.php');
     } else {
         ?>
 

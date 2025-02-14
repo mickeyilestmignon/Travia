@@ -18,5 +18,5 @@ if (isset($_GET['departure']) && isset($_GET['arrival'])) {
     header("Location: ../search_results.php?departure=$departure&arrival=$arrival");
 }
 else {
-    header("Location: ../index.php");
+    header("Location: ../search.php");
 }

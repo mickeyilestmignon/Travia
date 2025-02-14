@@ -5,7 +5,7 @@
 // Method display planets from the database
 
 global $cnx;
-include_once '/mnt/traban_home/3binf1/achirecesei/WWW/TraviaProject/include/connect.inc.php';
+include_once 'include/connect.inc.php';
 set_time_limit(600);
 
 class planet {
