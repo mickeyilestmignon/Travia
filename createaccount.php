@@ -77,7 +77,7 @@ if (isset($_POST['firstname']) && isset($_POST['lastname']) && isset($_POST['ema
       $query->bindParam(':workplanet', $workplanet, PDO::PARAM_STR);
       $query->execute();
 
-      header('Location: mailconfirm.php');
+      header('Location: sendmail.php?destination='.$email);
       exit();
     }
 }

@@ -1,37 +1,35 @@
 <?php
-  use lib\PHPMailer\src\PHPMailer;
+  global $cnx;
+  include('include/connect.inc.php');
 
-  require 'lib/PHPMailer/src/PHPMailer.php';
-  require 'lib/PHPMailer/src/SMTP.php';
-  require 'lib/PHPMailer/src/Exception.php';
+  if (!isset($_GET["destination"])) {
+    header('Location: createaccount.php');
+    exit();
+  }
 
-  function sendmail($email, $object, $body){
+  $email = urldecode($_GET["destination"]);
 
-    include 'cnx.php';
-    global $e_mail;
+  if (isset($_GET["code"])) {
 
-    $mail = new PHPMailer(true);
+    $code = $_GET["code"];
 
-    $mail->isSMTP();
-    $mail->SMTPAuth = true;
-    $mail->Host = "smtp.gmail.com";
-    $mail->Port = 465;
-    $mail->Username = $e_mail;
-    $mail->Password = $password_mail;
-    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-    $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+    $query = $cnx->prepare('SELECT verification_code FROM users WHERE email = :email');
+    $query->bindParam(':email', $email, PDO::PARAM_STR);
+    $query->execute();
+    $result = $query->fetch();
+    $bdd_code = $result["verification_code"];
 
-    $mail->setFrom($e_mail, 'Riche Abdlerahim');
-    $mail->addAddress($email);
+    if ($result && $code == $bdd_code) {
+      $query = $cnx->prepare('UPDATE users SET verified = 1 WHERE email = :email');
+      $query->bindParam(':email', $email, PDO::PARAM_STR);
+      $query->execute();
+      header('Location: accountcreated.php?destination='.$email);
+      exit();
 
-    $mail->isHTML(true);
-    $mail->Subject = $object;
-    $mail->Body = $body;
-
-    $mail->CharSet = 'UTF-8';
-    $mail->Encoding = 'base64';
-
-    $mail->send();
+    } else {
+      header('Location: mailconfirm.php?destination='.$email.'&error=incorect_code');
+      exit();
+    }
   }
 ?>
 
@@ -59,11 +57,13 @@
 <div class="MailVerification">
   <h1>Mail verification</h1>
 
-  <form action="mailconfirm.php" method="post">
+  <form action="mailconfirm.php" method="get">
 
-    <input type="number" maxlength="6" minlength="6">
+    <label for="code">Verification code:</label>
+    <input id="code" name="code" type="number" maxlength="6" minlength="6">
+    <input id="destination" name="destination" type="text" value="<?php echo $email; ?>" hidden>
 
-    <input class="inputSubmit" type="submit" value="Send verification code">
+    <input class="inputSubmit" type="submit" value="Verify">
 
   </form>
 
