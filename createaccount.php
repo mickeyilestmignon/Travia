@@ -71,10 +71,16 @@ if (isset($_POST['firstname']) && isset($_POST['lastname']) && isset($_POST['ema
       $query->bindParam(':firstname', $firstname, PDO::PARAM_STR);
       $query->bindParam(':lastname', $lastname, PDO::PARAM_STR);
       $query->bindParam(':email', $email, PDO::PARAM_STR);
-      $password = hash("sha256", $password);
+      $password = password_hash($password, PASSWORD_DEFAULT);
       $query->bindParam(':password', $password, PDO::PARAM_STR);
       $query->bindParam(':homeplanet', $homeplanet, PDO::PARAM_STR);
       $query->bindParam(':workplanet', $workplanet, PDO::PARAM_STR);
+      $query->execute();
+
+      // log
+      $query = $cnx->prepare('INSERT INTO logs_connect (description) VALUES (:description)');
+      $description = "User ".$email." created an account, pending verification";
+      $query->bindParam(':description', $description, PDO::PARAM_STR);
       $query->execute();
 
       header('Location: sendmail.php?destination='.$email);
@@ -91,7 +97,7 @@ if (isset($_POST['firstname']) && isset($_POST['lastname']) && isset($_POST['ema
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" type="text/css" href="index.css"/>
+    <link rel="stylesheet" type="text/css" href="logincreate.css"/>
 
     <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -139,6 +145,36 @@ if (isset($_POST["workplanet"])) {
 
 <div class="RegisterDiv">
   <h1>Register</h1>
+
+  <?php
+  if (isset($_GET["error"])) {
+    if ($_GET["error"] == "email_already_used") {
+      echo "<p class='error' >Email already used</p>";
+    } else if ($_GET["error"] == "password_mismatch") {
+      echo "<p class='error'>Passwords do not match</p>";
+    } else {
+      echo "<p class='error'>Password must contain at least ";
+      for ($i = 0; $i < strlen($_GET["error"]); $i++) {
+        if ($_GET["error"][$i] == "1") {
+          echo "12 characters";
+        } else if ($_GET["error"][$i] == "2") {
+          echo "one uppercase letter";
+        } else if ($_GET["error"][$i] == "3") {
+          echo "one lowercase letter";
+        } else if ($_GET["error"][$i] == "4") {
+          echo "one number";
+        } else if ($_GET["error"][$i] == "5") {
+          echo "one special character";
+        }
+        if ($i < strlen($_GET["error"]) - 1) {
+          echo ", ";
+        } else {
+          echo ".</p>";
+        }
+      }
+    }
+  }
+  ?>
 
   <form action="createaccount.php" method="post">
 

@@ -1,4 +1,10 @@
 <?php
+session_start();
+if (!isset($_SESSION['email'])) {
+  header('Location: index.php');
+  exit();
+}
+
 global $cnx;
 include 'include/connect.inc.php';
 include 'class/ship.php';

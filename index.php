@@ -1,3 +1,60 @@
+<?php
+include('include/connect.inc.php');
+global $cnx;
+
+if (isset($_POST['email']) && isset($_POST['password'])) {
+
+  $email = $_POST['email'];
+  $password = $_POST['password'];
+
+  $query = $cnx->prepare('SELECT * FROM users WHERE email = :email');
+  $query->bindParam(':email', $email, PDO::PARAM_STR);
+  $query->execute();
+  $result = $query->fetch();
+
+  if ($result && password_verify($password, $result['password'])) {
+
+    if ($result['verified'] == 0) {
+      header('Location: index.php?error=unverified&destination='.$email);
+      exit();
+    }
+
+    session_start([
+      'cookie_lifetime' => 3600*2,
+      'cookie_secure'   => true,
+      'cookie_httponly' => true,
+      'use_strict_mode' => true,
+    ]);
+    $_SESSION['email'] = $email;
+
+    if (isset($_POST['rememberMe'])) {
+      setcookie('email', $email, time() + 365*24*3600, null, null, false, true);
+    }
+
+    // log
+    $query = $cnx->prepare('INSERT INTO logs_connect (description) VALUES (:description)');
+    $description = "User ".$email." logged in";
+    $query->bindParam(':description', $description, PDO::PARAM_STR);
+    $query->execute();
+
+    header('Location: search.php');
+    exit();
+
+  } else {
+
+    // log
+    $query = $cnx->prepare('INSERT INTO logs_connect (description) VALUES (:description)');
+    $description = "A connexion failed on user ".$email.", incorrect password";
+    $query->bindParam(':description', $description, PDO::PARAM_STR);
+    $query->execute();
+
+    header('Location: index.php?error=incorrect_login');
+    exit();
+  }
+}
+
+?>
+
 <!DOCTYPE html>
 
 <html lang="en">
@@ -5,7 +62,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" type="text/css" href="index.css"/>
+    <link rel="stylesheet" type="text/css" href="logincreate.css"/>
 
     <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -21,6 +78,17 @@
 
     <div class="LoginDiv">
       <h1>Login</h1>
+
+      <?php
+      if (isset($_GET['error'])) {
+        if ($_GET['error'] == 'incorrect_login') {
+          echo '<p class="error">Incorrect email or password</p>';
+        } else if ($_GET['error'] == 'unverified') {
+          $email = urldecode($_GET["destination"]);
+          echo '<p class="error">Your account is not verified yet, <a href="mailconfirm.php?destination='.$email.'">enter confirmation code here</a></p>';
+        }
+      }
+      ?>
 
       <form action="index.php" method="post">
 
