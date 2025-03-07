@@ -1,4 +1,5 @@
 <?php
+session_start(); // Keep form values if failed
 
 if (isset($_POST['firstname']) && isset($_POST['lastname']) && isset($_POST['email']) && isset($_POST['password']) && isset($_POST['confirmPassword'])) {
 
@@ -14,8 +15,16 @@ if (isset($_POST['firstname']) && isset($_POST['lastname']) && isset($_POST['ema
     // Check if mail already used
     $query = $cnx->query('SELECT * FROM users WHERE email = "'.$email .'"');
     if ($query->rowCount() > 0) {
-        header('Location: createaccount.php?error=email_already_used');
-        exit();
+
+      // log email already used
+      $query = $cnx->prepare('INSERT INTO logs_connect (description) VALUES (:description)');
+      $description = "Attempt to create an account with the already used email : ".$email;
+      $query->bindParam(':description', $description, PDO::PARAM_STR);
+      $query->execute();
+
+      $_SESSION['form_data'] = $_POST;
+      header('Location: createaccount.php?error=email_already_used');
+      exit();
     }
 
     if (empty($_POST['homeplanet'])) {
@@ -34,6 +43,7 @@ if (isset($_POST['firstname']) && isset($_POST['lastname']) && isset($_POST['ema
 
     // Check if passwords match
     if ($password !== $confirmPassword) {
+      $_SESSION['form_data'] = $_POST;
       header('Location: createaccount.php?error=password_mismatch');
       exit();
     }
@@ -64,10 +74,12 @@ if (isset($_POST['firstname']) && isset($_POST['lastname']) && isset($_POST['ema
     }
 
     if (!empty($errors)) {
+      $_SESSION['form_data'] = $_POST;
       header('Location: createaccount.php?error='.$errors);
       exit();
+
     } else {
-      $query = $cnx->prepare('INSERT INTO users (firstname, lastname, email, password, homeplanet, workplanet) VALUES (:firstname, :lastname, :email, :password, :homeplanet, :workplanet)');
+      $query = $cnx->prepare('INSERT INTO users (firstname, lastname, email, password, homeplanet, workplanet, previous_passwords) VALUES (:firstname, :lastname, :email, :password, :homeplanet, :workplanet, :previous_passwords)');
       $query->bindParam(':firstname', $firstname, PDO::PARAM_STR);
       $query->bindParam(':lastname', $lastname, PDO::PARAM_STR);
       $query->bindParam(':email', $email, PDO::PARAM_STR);
@@ -75,14 +87,19 @@ if (isset($_POST['firstname']) && isset($_POST['lastname']) && isset($_POST['ema
       $query->bindParam(':password', $password, PDO::PARAM_STR);
       $query->bindParam(':homeplanet', $homeplanet, PDO::PARAM_STR);
       $query->bindParam(':workplanet', $workplanet, PDO::PARAM_STR);
+      $array = [$password];
+      $serialized_array = serialize($array);
+      $query->bindParam(':previous_passwords', $serialized_array, PDO::PARAM_STR);
+
       $query->execute();
 
-      // log
+      // log account created
       $query = $cnx->prepare('INSERT INTO logs_connect (description) VALUES (:description)');
       $description = "User ".$email." created an account, pending verification";
       $query->bindParam(':description', $description, PDO::PARAM_STR);
       $query->execute();
 
+      unset($_SESSION['form_data']); // Remove form values
       header('Location: sendmail.php?destination='.$email);
       exit();
     }
@@ -100,6 +117,7 @@ if (isset($_POST['firstname']) && isset($_POST['lastname']) && isset($_POST['ema
     <link rel="stylesheet" type="text/css" href="logincreate.css"/>
 
     <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="script/showPassword.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
 
@@ -111,35 +129,20 @@ if (isset($_POST['firstname']) && isset($_POST['lastname']) && isset($_POST['ema
 
 <body>
 
-<?php // Header supprime les post
+<?php
 $firstname = "";
 $lastname = "";
 $email = "";
-$password = "";
-$confirmPassword = "";
 $homeplanet = "";
 $workplanet = "";
 
-if (isset($_POST["firstname"])) {
-  $firstname = $_POST["firstname"];
-}
-if (isset($_POST["lastname"])) {
-  $lastname = $_POST["lastname"];
-}
-if (isset($_POST["email"])) {
-  $email = $_POST["email"];
-}
-if (isset($_POST["password"])) {
-  $password = $_POST["password"];
-}
-if (isset($_POST["confirmPassword"])) {
-  $confirmPassword = $_POST["confirmPassword"];
-}
-if (isset($_POST["homeplanet"])) {
-  $homeplanet = $_POST["homeplanet"];
-}
-if (isset($_POST["workplanet"])) {
-  $workplanet = $_POST["workplanet"];
+if (isset($_SESSION['form_data'])) {
+    $firstname = $_SESSION['form_data']['firstname'];
+    $lastname = $_SESSION['form_data']['lastname'];
+    $email = $_SESSION['form_data']['email'];
+    $homeplanet = $_SESSION['form_data']['homeplanet'];
+    $workplanet = $_SESSION['form_data']['workplanet'];
+    unset($_SESSION['form_data']);
 }
 ?>
 
@@ -178,27 +181,27 @@ if (isset($_POST["workplanet"])) {
 
   <form action="createaccount.php" method="post">
 
-    <input type="text" id="firstname" name="firstname" placeholder="First name" value="<?php echo $firstname; ?>" required>
+    <input type="text" id="firstname" name="firstname" placeholder="First name" value="<?php echo htmlspecialchars($firstname); ?>" required>
 
-    <input type="text" id="lastname" name="lastname" placeholder="Name" value="<?php echo $lastname; ?>" required>
+    <input type="text" id="lastname" name="lastname" placeholder="Name" value="<?php echo htmlspecialchars($lastname); ?>" required>
 
-    <input type="email" id="email" name="email" placeholder="Email" value="<?php echo $email; ?>" required>
+    <input type="email" id="email" name="email" placeholder="Email" value="<?php echo htmlspecialchars($email); ?>" required>
 
     <div class="LoginDivPassword">
-      <input type="password" id="password" name="password" placeholder="Password" value="<?php echo $password; ?>" required>
+      <input type="password" id="password" name="password" placeholder="Password" required>
       <input class="Checkbox" type="checkbox" onclick="showPassword()">
     </div>
 
     <div class="LoginDivPassword">
-      <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm password" value="<?php echo $confirmPassword; ?>" required>
+      <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm password" required>
       <input class="Checkbox" type="checkbox" onclick="showConfirmPassword()">
     </div>
 
     <p>Mandatory information</p>
 
-    <input type="text" id="homeplanet" name="homeplanet" placeholder="Home planet" value="<?php echo $homeplanet; ?>">
+    <input type="text" id="homeplanet" name="homeplanet" placeholder="Home planet" value="<?php echo htmlspecialchars($homeplanet); ?>">
 
-    <input type="text" id="workplanet" name="workplanet" placeholder="Work planet" value="<?php echo $workplanet; ?>">
+    <input type="text" id="workplanet" name="workplanet" placeholder="Work planet" value="<?php echo htmlspecialchars($workplanet); ?>">
 
     <p>Optional information</p>
 
@@ -213,23 +216,3 @@ if (isset($_POST["workplanet"])) {
 </body>
 
 </html>
-
-<script>
-  function showPassword() {
-    var password = document.getElementById("password");
-    if (password.type === "password") {
-      password.type = "text";
-    } else {
-      password.type = "password";
-    }
-  }
-
-  function showConfirmPassword() {
-    var confirmPassword = document.getElementById("confirmPassword");
-    if (confirmPassword.type === "password") {
-      confirmPassword.type = "text";
-    } else {
-      confirmPassword.type = "password";
-    }
-  }
-</script>

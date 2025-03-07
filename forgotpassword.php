@@ -21,8 +21,8 @@ include('include/connect.inc.php');
 
 if (isset($_POST["destination"]) && isset($_POST["code"])) { // Code entered ---------------------------------------------------------------------
 
-  $email = urldecode($_GET["destination"]);
-  $code = $_GET["code"];
+  $email = urldecode($_POST["destination"]);
+  $code = $_POST["code"];
 
   $query = $cnx->prepare('SELECT verification_code, send_time FROM users WHERE email = :email');
   $query->bindParam(':email', $email, PDO::PARAM_STR);
@@ -43,11 +43,19 @@ if (isset($_POST["destination"]) && isset($_POST["code"])) { // Code entered ---
     $query->bindParam(':email', $email, PDO::PARAM_STR);
     $query->execute();
 
-    // log
+    // log recovery succesful
     $query = $cnx->prepare('INSERT INTO logs_connect (description) VALUES (:description)');
     $description = "User ".$email." succesfully recovered its account";
     $query->bindParam(':description', $description, PDO::PARAM_STR);
     $query->execute();
+
+    session_start([
+      'cookie_lifetime' => 3600*2,
+      'cookie_secure'   => true,
+      'cookie_httponly' => true,
+      'use_strict_mode' => true,
+    ]);
+    $_SESSION['email'] = $email;
 
     header('Location: newpassword.php?destination='.$email);
     exit();
@@ -57,28 +65,32 @@ if (isset($_POST["destination"]) && isset($_POST["code"])) { // Code entered ---
     exit();
   }
 
-} else if (isset($_POST["email"])) { // Email entered ---------------------------------------------------------------------
+} else if (isset($_GET["destination"])) { // Email entered ---------------------------------------------------------------------
 
-  $email = $_POST["email"];
+  $email = $_GET["destination"];
 
-  $object = "Password recovery";
-  $code = rand(100000, 999999);
-  $body = "Your recovery code is: " . $code;
+  if (!isset($_GET["error"])) {
 
-  sendmail($email, $object, $body);
+    $object = "Password recovery";
+    $code = rand(100000, 999999);
+    $body = "Your recovery code is: " . $code;
 
-  $query = $cnx->prepare('UPDATE users SET verification_code = :code, send_time = :send_time WHERE email = :email');
-  $query->bindParam(':code', $code, PDO::PARAM_INT);
-  $unixTime = time();
-  $query->bindParam(':send_time', $unixTime, PDO::PARAM_INT);
-  $query->bindParam(':email', $email, PDO::PARAM_STR);
-  $query->execute();
+    sendmail($email, $object, $body);
 
-  // log
-  $query = $cnx->prepare('INSERT INTO logs_connect (description) VALUES (:description)');
-  $description = "Recovery code sent to ".$email;
-  $query->bindParam(':description', $description, PDO::PARAM_STR);
-  $query->execute();
+    $query = $cnx->prepare('UPDATE users SET verification_code = :code, send_time = :send_time WHERE email = :email');
+    $query->bindParam(':code', $code, PDO::PARAM_INT);
+    $unixTime = time();
+    $query->bindParam(':send_time', $unixTime, PDO::PARAM_INT);
+    $query->bindParam(':email', $email, PDO::PARAM_STR);
+    $query->execute();
+
+    // log recovery code sent
+    $query = $cnx->prepare('INSERT INTO logs_connect (description) VALUES (:description)');
+    $description = "Recovery code sent to ".$email;
+    $query->bindParam(':description', $description, PDO::PARAM_STR);
+    $query->execute();
+
+  }
 
   ?>
 
@@ -105,12 +117,14 @@ if (isset($_POST["destination"]) && isset($_POST["code"])) { // Code entered ---
 
       <label for="code">Enter the recovery code sent to : <?php echo $email; ?></label>
       <input type="text" id="code" name="code" placeholder="Code" required>
-      <input id="destination" name="destination" type="text" value="<?php echo $email; ?>" hidden>
+      <input id="destination" name="destination" type="email" value="<?php echo $email; ?>" hidden>
 
       <p style="font-weight: normal">If you didn't receive anything, make sure the email you submited is correct and has an account created</p>
 
       <input class="inputSubmit" type="submit" value="Submit recover code">
     </form>
+
+    <a href="forgotpassword.php?destination=<?php echo $email; ?>"><button>Send another code</button></a>
 
   </div>
 
@@ -132,9 +146,9 @@ if (isset($_POST["destination"]) && isset($_POST["code"])) { // Code entered ---
 
   <h1>Recover your account</h1>
 
-  <form action="forgotpassword.php" method="post">
+  <form action="forgotpassword.php" method="get">
 
-    <input type="email" id="email" name="email" placeholder="Email" required>
+    <input type="email" id="destination" name="destination" placeholder="Email" required>
 
     <input class="inputSubmit" type="submit" value="Submit recover code">
   </form>

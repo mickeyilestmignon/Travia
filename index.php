@@ -27,11 +27,7 @@ if (isset($_POST['email']) && isset($_POST['password'])) {
     ]);
     $_SESSION['email'] = $email;
 
-    if (isset($_POST['rememberMe'])) {
-      setcookie('email', $email, time() + 365*24*3600, null, null, false, true);
-    }
-
-    // log
+    // log connexion
     $query = $cnx->prepare('INSERT INTO logs_connect (description) VALUES (:description)');
     $description = "User ".$email." logged in";
     $query->bindParam(':description', $description, PDO::PARAM_STR);
@@ -44,7 +40,7 @@ if (isset($_POST['email']) && isset($_POST['password'])) {
 
     // log
     $query = $cnx->prepare('INSERT INTO logs_connect (description) VALUES (:description)');
-    $description = "A connexion failed on user ".$email.", incorrect password";
+    $description = "A connexion failed on email : ".$email;
     $query->bindParam(':description', $description, PDO::PARAM_STR);
     $query->execute();
 
@@ -65,6 +61,7 @@ if (isset($_POST['email']) && isset($_POST['password'])) {
     <link rel="stylesheet" type="text/css" href="logincreate.css"/>
 
     <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="script/showPassword.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
 
@@ -100,7 +97,9 @@ if (isset($_POST['email']) && isset($_POST['password'])) {
         </div>
 
         <div class="LoginDivOptions">
-          <label for="rememberMe"><input type="checkbox" id="rememberMe" name="rememberMe" checked>Remember me</label>
+          <label for="rememberMe">
+            <input type="checkbox" id="rememberMe" name="rememberMe" checked>
+            Remember me</label>
           <a href="forgotpassword.php">Forgot password ?</a>
         </div>
 
@@ -114,14 +113,3 @@ if (isset($_POST['email']) && isset($_POST['password'])) {
 </body>
 
 </html>
-
-<script>
-  function showPassword() {
-    var password = document.getElementById("password");
-    if (password.type === "password") {
-      password.type = "text";
-    } else {
-      password.type = "password";
-    }
-  }
-</script>
